@@ -1,16 +1,8 @@
-/* =========================================================
-   CINEMATIC FIGHTER JET DESTRUCTION LAYER
-   Additive overlay. Original page code is untouched.
-========================================================= */
 (function () {
   "use strict";
 
   var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var TOUCH = window.matchMedia("(hover: none)").matches;
-
-  /* ---------------------------------------------------
-     OVERLAY MARKUP
-  --------------------------------------------------- */
 
   var layer = document.createElement("div");
   layer.id = "jetfx-layer";
@@ -55,13 +47,22 @@
   var resetBtn = document.getElementById("jetfx-reset");
   var countEl = document.getElementById("jetfx-count");
 
-  /* ---------------------------------------------------
-     STATE
-  --------------------------------------------------- */
-
   var W = 0, H = 0, DPR = 1;
-  var pointer = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.45, active: false };
-  var jet = { x: pointer.x - 220, y: pointer.y - 180, vx: 0, vy: 0, angle: 0, bank: 0 };
+  var pointer = {
+    x: window.innerWidth * 0.5,
+    y: window.innerHeight * 0.45,
+    active: false
+  };
+
+  var jet = {
+    x: pointer.x - 220,
+    y: pointer.y - 180,
+    vx: 0,
+    vy: 0,
+    angle: 0,
+    bank: 0
+  };
+
   var particles = [];
   var beams = [];
   var flashes = [];
@@ -77,12 +78,9 @@
     canvas.height = Math.floor(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
+
   resize();
   window.addEventListener("resize", resize);
-
-  /* ---------------------------------------------------
-     TARGET SELECTION
-  --------------------------------------------------- */
 
   var DESTROYABLE =
     "a,img,h1,h2,h3,h4,p,li,span,button,label,input,textarea,footer,section,header,nav,form," +
@@ -90,10 +88,12 @@
 
   function pickTarget(x, y) {
     var el = document.elementFromPoint(x, y);
+
     if (!el) return null;
     if (layer.contains(el)) return null;
 
     var node = el;
+
     while (node && node !== document.body) {
       if (
         !node.classList.contains("jetfx-gone") &&
@@ -101,17 +101,27 @@
         node.matches(DESTROYABLE)
       ) {
         var r = node.getBoundingClientRect();
-        if (r.width > 8 && r.height > 8 && r.height < H * 1.6) return node;
+
+        if (r.width > 8 && r.height > 8 && r.height < H * 1.6) {
+          return node;
+        }
       }
+
       node = node.parentElement;
     }
+
     return null;
   }
 
   function setTarget(el) {
     if (target === el) return;
-    if (target) target.classList.remove("jetfx-locked");
+
+    if (target) {
+      target.classList.remove("jetfx-locked");
+    }
+
     target = el;
+
     if (target) {
       target.classList.add("jetfx-locked");
       label.textContent = "LOCK · " + target.tagName;
@@ -120,65 +130,84 @@
     }
   }
 
-  /* ---------------------------------------------------
-     POINTER
-  --------------------------------------------------- */
-
   function onMove(e) {
     pointer.x = e.clientX;
     pointer.y = e.clientY;
     pointer.active = true;
+
     reticle.classList.add("is-on");
     setTarget(pickTarget(pointer.x, pointer.y));
   }
 
-  window.addEventListener("pointermove", onMove, { passive: true });
+  window.addEventListener("pointermove", onMove, {
+    passive: true
+  });
 
   window.addEventListener("pointerdown", function (e) {
     if (!armed) return;
     if (layer.contains(e.target)) return;
+
     pointer.x = e.clientX;
     pointer.y = e.clientY;
+
     var hit = pickTarget(e.clientX, e.clientY);
+
     if (!hit) return;
-    // attack mode takes over the click so nothing else fires
+
     e.preventDefault();
     e.stopPropagation();
+
     setTarget(hit);
     fire(hit, e.clientX, e.clientY);
   }, true);
 
   window.addEventListener("click", function (e) {
-    if (armed && !layer.contains(e.target) && pickTarget(e.clientX, e.clientY)) {
+    if (
+      armed &&
+      !layer.contains(e.target) &&
+      pickTarget(e.clientX, e.clientY)
+    ) {
       e.preventDefault();
       e.stopPropagation();
     }
   }, true);
 
-  /* ---------------------------------------------------
-     WEAPONS
-  --------------------------------------------------- */
-
   function nose() {
     var len = 78;
+
     return {
       x: jet.x + Math.cos(jet.angle - Math.PI / 2) * len,
-      y: jet.y + Math.sin(jet.angle - Math.PI / 2) * len,
+      y: jet.y + Math.sin(jet.angle - Math.PI / 2) * len
     };
   }
 
   function fire(el, x, y) {
     var n = nose();
-    beams.push({ x1: n.x, y1: n.y, x2: x, y2: y, life: 1 });
-    flashes.push({ x: x, y: y, r: 6, life: 1 });
+
+    beams.push({
+      x1: n.x,
+      y1: n.y,
+      x2: x,
+      y2: y,
+      life: 1
+    });
+
+    flashes.push({
+      x: x,
+      y: y,
+      r: 6,
+      life: 1
+    });
 
     var rect = el.getBoundingClientRect();
+
     burst(x, y, rect);
 
     if (!REDUCED) {
       document.documentElement.classList.remove("jetfx-quake");
       void document.documentElement.offsetWidth;
       document.documentElement.classList.add("jetfx-quake");
+
       setTimeout(function () {
         document.documentElement.classList.remove("jetfx-quake");
       }, 380);
@@ -191,35 +220,47 @@
     setTimeout(function () {
       el.classList.remove("jetfx-shake");
       el.classList.add("jetfx-destroying");
+
       setTimeout(function () {
         el.classList.remove("jetfx-destroying");
         el.classList.add("jetfx-gone");
       }, REDUCED ? 300 : 700);
     }, REDUCED ? 0 : 260);
 
-    if (destroyed.indexOf(el) === -1) destroyed.push(el);
+    if (destroyed.indexOf(el) === -1) {
+      destroyed.push(el);
+    }
+
     countEl.textContent = "TARGETS DOWN " + destroyed.length;
   }
 
   function burst(x, y, rect) {
     var i, a, s;
+
     var sparks = REDUCED ? 14 : 70;
+
     for (i = 0; i < sparks; i++) {
       a = Math.random() * Math.PI * 2;
       s = 2 + Math.random() * 11;
+
       particles.push({
         t: "spark",
-        x: x, y: y,
+        x: x,
+        y: y,
         vx: Math.cos(a) * s,
         vy: Math.sin(a) * s,
-        life: 1, decay: 0.014 + Math.random() * 0.03,
-        size: 1 + Math.random() * 2.4,
+        life: 1,
+        decay: 0.014 + Math.random() * 0.03,
+        size: 1 + Math.random() * 2.4
       });
     }
+
     var debris = REDUCED ? 6 : 26;
+
     for (i = 0; i < debris; i++) {
       a = Math.random() * Math.PI * 2;
       s = 1 + Math.random() * 6;
+
       particles.push({
         t: "debris",
         x: x + (Math.random() - 0.5) * Math.min(rect.width, 260),
@@ -228,11 +269,14 @@
         vy: Math.sin(a) * s - 2,
         rot: Math.random() * 6.28,
         vr: (Math.random() - 0.5) * 0.4,
-        life: 1, decay: 0.008 + Math.random() * 0.01,
-        size: 3 + Math.random() * 9,
+        life: 1,
+        decay: 0.008 + Math.random() * 0.01,
+        size: 3 + Math.random() * 9
       });
     }
+
     var smoke = REDUCED ? 4 : 22;
+
     for (i = 0; i < smoke; i++) {
       particles.push({
         t: "smoke",
@@ -240,53 +284,87 @@
         y: y + (Math.random() - 0.5) * 40,
         vx: (Math.random() - 0.5) * 1.6,
         vy: -0.6 - Math.random() * 1.6,
-        life: 1, decay: 0.006 + Math.random() * 0.008,
-        size: 18 + Math.random() * 40,
+        life: 1,
+        decay: 0.006 + Math.random() * 0.008,
+        size: 18 + Math.random() * 40
       });
     }
   }
 
-  /* ---------------------------------------------------
-     RENDER LOOP
-  --------------------------------------------------- */
-
   function step() {
     ctx.clearRect(0, 0, W, H);
 
-    /* --- jet flight: steady hold position, no orbiting --- */
     var tx = pointer.x - 170;
     var ty = pointer.y - 140;
 
-    // critically damped follow -> smooth, no overshoot or wobble
     var ease = REDUCED ? 0.2 : 0.085;
+
     jet.vx = (tx - jet.x) * ease;
     jet.vy = (ty - jet.y) * ease;
+
     jet.x += jet.vx;
     jet.y += jet.vy;
 
-    var aim = Math.atan2(pointer.y - jet.y, pointer.x - jet.x) + Math.PI / 2;
-    var d = ((aim - jet.angle + Math.PI) % (Math.PI * 2)) - Math.PI;
+    var aim =
+      Math.atan2(pointer.y - jet.y, pointer.x - jet.x) +
+      Math.PI / 2;
+
+    var d =
+      ((aim - jet.angle + Math.PI) % (Math.PI * 2)) -
+      Math.PI;
+
     jet.angle += d * 0.07;
-    jet.bank += (Math.max(-16, Math.min(16, jet.vx * 0.9)) - jet.bank) * 0.07;
+
+    jet.bank +=
+      (Math.max(-16, Math.min(16, jet.vx * 0.9)) - jet.bank) *
+      0.07;
 
     jetEl.style.transform =
-      "translate3d(" + jet.x + "px," + jet.y + "px,0) rotate(" + jet.angle + "rad) " +
-      "rotateY(" + jet.bank + "deg)";
+      "translate3d(" +
+      jet.x +
+      "px," +
+      jet.y +
+      "px,0) rotate(" +
+      jet.angle +
+      "rad) rotateY(" +
+      jet.bank +
+      "deg)";
 
-    reticle.style.transform = "translate3d(" + pointer.x + "px," + pointer.y + "px,0)";
+    reticle.style.transform =
+      "translate3d(" +
+      pointer.x +
+      "px," +
+      pointer.y +
+      "px,0)";
 
-    /* --- aiming laser --- */
     var n = nose();
+
     if (pointer.active) {
-      var grd = ctx.createLinearGradient(n.x, n.y, pointer.x, pointer.y);
-      grd.addColorStop(0, "rgba(255,210,63,0.9)");
-      grd.addColorStop(1, "rgba(255,110,78,0.15)");
+      var grd = ctx.createLinearGradient(
+        n.x,
+        n.y,
+        pointer.x,
+        pointer.y
+      );
+
+      grd.addColorStop(
+        0,
+        "rgba(255,210,63,0.9)"
+      );
+
+      grd.addColorStop(
+        1,
+        "rgba(255,110,78,0.15)"
+      );
+
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
       ctx.strokeStyle = grd;
       ctx.lineWidth = 1.6;
       ctx.setLineDash([12, 10]);
-      ctx.lineDashOffset = -(performance.now() / 22) % 22;
+      ctx.lineDashOffset =
+        -(performance.now() / 22) % 22;
+
       ctx.beginPath();
       ctx.moveTo(n.x, n.y);
       ctx.lineTo(pointer.x, pointer.y);
@@ -294,9 +372,9 @@
       ctx.restore();
     }
 
-    /* --- fired beams --- */
     for (var b = beams.length - 1; b >= 0; b--) {
       var bm = beams[b];
+
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
       ctx.globalAlpha = bm.life;
@@ -304,40 +382,80 @@
       ctx.lineWidth = 12 * bm.life;
       ctx.shadowColor = "#FF6E4E";
       ctx.shadowBlur = 40;
+
       ctx.beginPath();
       ctx.moveTo(bm.x1, bm.y1);
       ctx.lineTo(bm.x2, bm.y2);
       ctx.stroke();
+
       ctx.strokeStyle = "#fff";
       ctx.lineWidth = 4 * bm.life;
       ctx.stroke();
+
       ctx.restore();
+
       bm.life -= 0.06;
-      if (bm.life <= 0) beams.splice(b, 1);
+
+      if (bm.life <= 0) {
+        beams.splice(b, 1);
+      }
     }
 
-    /* --- impact flashes --- */
     for (var f = flashes.length - 1; f >= 0; f--) {
       var fl = flashes[f];
+
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      var g = ctx.createRadialGradient(fl.x, fl.y, 0, fl.x, fl.y, fl.r * 22);
-      g.addColorStop(0, "rgba(255,255,255," + fl.life + ")");
-      g.addColorStop(0.3, "rgba(255,210,63," + fl.life * 0.7 + ")");
-      g.addColorStop(1, "rgba(255,110,78,0)");
+
+      var g = ctx.createRadialGradient(
+        fl.x,
+        fl.y,
+        0,
+        fl.x,
+        fl.y,
+        fl.r * 22
+      );
+
+      g.addColorStop(
+        0,
+        "rgba(255,255,255," + fl.life + ")"
+      );
+
+      g.addColorStop(
+        0.3,
+        "rgba(255,210,63," + fl.life * 0.7 + ")"
+      );
+
+      g.addColorStop(
+        1,
+        "rgba(255,110,78,0)"
+      );
+
       ctx.fillStyle = g;
+
       ctx.beginPath();
-      ctx.arc(fl.x, fl.y, fl.r * 22, 0, 6.2832);
+      ctx.arc(
+        fl.x,
+        fl.y,
+        fl.r * 22,
+        0,
+        6.2832
+      );
       ctx.fill();
+
       ctx.restore();
+
       fl.r += 1.6;
       fl.life -= 0.055;
-      if (fl.life <= 0) flashes.splice(f, 1);
+
+      if (fl.life <= 0) {
+        flashes.splice(f, 1);
+      }
     }
 
-    /* --- particles --- */
     for (var p = particles.length - 1; p >= 0; p--) {
       var o = particles[p];
+
       o.x += o.vx;
       o.y += o.vy;
       o.life -= o.decay;
@@ -345,75 +463,135 @@
       if (o.t === "spark") {
         o.vy += 0.22;
         o.vx *= 0.985;
+
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
         ctx.globalAlpha = Math.max(o.life, 0);
-        ctx.strokeStyle = o.life > 0.6 ? "#fff" : "#FFD23F";
+        ctx.strokeStyle =
+          o.life > 0.6 ? "#fff" : "#FFD23F";
         ctx.lineWidth = o.size;
         ctx.lineCap = "round";
+
         ctx.beginPath();
         ctx.moveTo(o.x, o.y);
-        ctx.lineTo(o.x - o.vx * 2.2, o.y - o.vy * 2.2);
+        ctx.lineTo(
+          o.x - o.vx * 2.2,
+          o.y - o.vy * 2.2
+        );
         ctx.stroke();
+
         ctx.restore();
       } else if (o.t === "debris") {
         o.vy += 0.34;
         o.rot += o.vr;
+
         ctx.save();
         ctx.globalAlpha = Math.max(o.life, 0);
         ctx.translate(o.x, o.y);
         ctx.rotate(o.rot);
-        ctx.fillStyle = p % 3 === 0 ? "#5B3EF5" : p % 3 === 1 ? "#F4F2FF" : "#FF6E4E";
-        ctx.fillRect(-o.size / 2, -o.size / 4, o.size, o.size / 2);
+
+        ctx.fillStyle =
+          p % 3 === 0
+            ? "#5B3EF5"
+            : p % 3 === 1
+            ? "#F4F2FF"
+            : "#FF6E4E";
+
+        ctx.fillRect(
+          -o.size / 2,
+          -o.size / 4,
+          o.size,
+          o.size / 2
+        );
+
         ctx.restore();
       } else {
         o.vy -= 0.01;
         o.size += 0.9;
+
         ctx.save();
-        ctx.globalAlpha = Math.max(o.life, 0) * 0.28;
-        var sg = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.size);
-        sg.addColorStop(0, "rgba(120,120,140,0.9)");
-        sg.addColorStop(1, "rgba(20,20,30,0)");
+        ctx.globalAlpha =
+          Math.max(o.life, 0) * 0.28;
+
+        var sg = ctx.createRadialGradient(
+          o.x,
+          o.y,
+          0,
+          o.x,
+          o.y,
+          o.size
+        );
+
+        sg.addColorStop(
+          0,
+          "rgba(120,120,140,0.9)"
+        );
+
+        sg.addColorStop(
+          1,
+          "rgba(20,20,30,0)"
+        );
+
         ctx.fillStyle = sg;
+
         ctx.beginPath();
-        ctx.arc(o.x, o.y, o.size, 0, 6.2832);
+        ctx.arc(
+          o.x,
+          o.y,
+          o.size,
+          0,
+          6.2832
+        );
         ctx.fill();
+
         ctx.restore();
       }
 
-      if (o.life <= 0) particles.splice(p, 1);
+      if (o.life <= 0) {
+        particles.splice(p, 1);
+      }
     }
 
     requestAnimationFrame(step);
   }
-  requestAnimationFrame(step);
 
-  /* ---------------------------------------------------
-     HUD CONTROLS
-  --------------------------------------------------- */
+  requestAnimationFrame(step);
 
   armBtn.addEventListener("click", function () {
     armed = !armed;
-    armBtn.classList.toggle("is-armed", armed);
-    armText.textContent = armed ? "Weapons armed" : "Weapons safe";
-    if (!armed) setTarget(null);
+
+    armBtn.classList.toggle(
+      "is-armed",
+      armed
+    );
+
+    armText.textContent =
+      armed ? "Weapons armed" : "Weapons safe";
+
+    if (!armed) {
+      setTarget(null);
+    }
   });
 
   resetBtn.addEventListener("click", function () {
     destroyed.forEach(function (el) {
-      el.classList.remove("jetfx-gone", "jetfx-destroying", "jetfx-shake", "jetfx-locked");
+      el.classList.remove(
+        "jetfx-gone",
+        "jetfx-destroying",
+        "jetfx-shake",
+        "jetfx-locked"
+      );
+
       el.classList.add("jetfx-rebuild");
+
       setTimeout(function () {
         el.classList.remove("jetfx-rebuild");
       }, 520);
     });
+
     destroyed = [];
     countEl.textContent = "TARGETS DOWN 0";
   });
-
-  /* ---------------------------------------------------
-     TOUCH HINT
-  --------------------------------------------------- */
 
   if (TOUCH) {
     pointer.active = true;
