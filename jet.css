@@ -1,8 +1,3 @@
-/* =========================================================
-   FIGHTER JET DESTRUCTION OVERLAY  (namespaced: .jetfx-*)
-   Purely additive. Does not touch original page styles.
-========================================================= */
-
 #jetfx-layer,
 #jetfx-layer * {
   box-sizing: border-box;
@@ -24,8 +19,6 @@
   height: 100%;
   pointer-events: none;
 }
-
-/* ---------- JET ---------- */
 
 .jetfx-jet {
   position: absolute;
@@ -51,34 +44,40 @@
   image-rendering: crisp-edges;
 }
 
-/* pixel-block exhaust, drawn as hard-edged squares */
 .jetfx-thrust {
   position: absolute;
   top: 88%;
   width: 8px;
   height: 22px;
   background:
-    linear-gradient(#FFD23F 0 40%, #FF6E4E 40% 72%, rgba(255, 110, 78, 0) 72% 100%);
+    linear-gradient(
+      #FFD23F 0 40%,
+      #FF6E4E 40% 72%,
+      rgba(255, 110, 78, 0) 72% 100%
+    );
   animation: jetfx-burn 0.1s infinite alternate;
   transform-origin: 50% 0;
 }
 
-.jetfx-thrust-l { left: calc(50% - 13px); }
-.jetfx-thrust-r { left: calc(50% + 5px); }
+.jetfx-thrust-l {
+  left: calc(50% - 13px);
+}
 
+.jetfx-thrust-r {
+  left: calc(50% + 5px);
+}
 
 @keyframes jetfx-burn {
   from {
     transform: scaleY(0.82) scaleX(0.9);
     opacity: 0.85;
   }
+
   to {
     transform: scaleY(1.22) scaleX(1.06);
     opacity: 1;
   }
 }
-
-/* ---------- RETICLE ---------- */
 
 .jetfx-reticle {
   position: absolute;
@@ -123,8 +122,6 @@
   text-shadow: 0 0 10px rgba(255, 110, 78, 0.8);
 }
 
-/* ---------- TARGET HIGHLIGHT (no layout change) ---------- */
-
 .jetfx-locked {
   outline: 1px dashed rgba(255, 110, 78, 0.85) !important;
   outline-offset: 4px;
@@ -139,9 +136,17 @@
 }
 
 @keyframes jetfx-shake {
-  10%, 90% { transform: translate3d(-3px, 1px, 0) rotate(-0.4deg); }
-  30%, 70% { transform: translate3d(5px, -2px, 0) rotate(0.7deg); }
-  50%      { transform: translate3d(-6px, 2px, 0) rotate(-0.8deg); }
+  10%, 90% {
+    transform: translate3d(-3px, 1px, 0) rotate(-0.4deg);
+  }
+
+  30%, 70% {
+    transform: translate3d(5px, -2px, 0) rotate(0.7deg);
+  }
+
+  50% {
+    transform: translate3d(-6px, 2px, 0) rotate(-0.8deg);
+  }
 }
 
 .jetfx-destroying {
@@ -154,16 +159,19 @@
     opacity: 1;
     filter: brightness(2.4) contrast(1.4);
   }
+
   22% {
     opacity: 0.9;
     filter: brightness(3.2) blur(1px);
     transform: translate3d(2px, -2px, 0) scale(1.015) skewX(1.5deg);
   }
+
   60% {
     opacity: 0.35;
     filter: blur(5px) brightness(1.4) saturate(0.4);
     transform: translate3d(-6px, 8px, 0) scale(0.97) skewX(-2deg);
   }
+
   100% {
     opacity: 0;
     filter: blur(14px) grayscale(1);
@@ -171,7 +179,6 @@
   }
 }
 
-/* keeps layout space intact after destruction */
 .jetfx-gone {
   visibility: hidden !important;
   opacity: 0 !important;
@@ -183,24 +190,44 @@
 }
 
 @keyframes jetfx-rebuild {
-  from { opacity: 0; filter: blur(8px); transform: translate3d(0, 10px, 0); }
-  to   { opacity: 1; filter: none; transform: none; }
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate3d(0, 10px, 0);
+  }
+
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
 }
 
-/* screen shake applied to <html> */
 .jetfx-quake {
   animation: jetfx-quake 0.36s ease-out;
 }
 
 @keyframes jetfx-quake {
-  0%   { transform: translate3d(0, 0, 0); }
-  25%  { transform: translate3d(-5px, 3px, 0); }
-  50%  { transform: translate3d(6px, -4px, 0); }
-  75%  { transform: translate3d(-3px, 2px, 0); }
-  100% { transform: translate3d(0, 0, 0); }
-}
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
 
-/* ---------- HUD PANEL ---------- */
+  25% {
+    transform: translate3d(-5px, 3px, 0);
+  }
+
+  50% {
+    transform: translate3d(6px, -4px, 0);
+  }
+
+  75% {
+    transform: translate3d(-3px, 2px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
 
 .jetfx-hud {
   position: absolute;
@@ -252,7 +279,9 @@
 }
 
 @keyframes jetfx-pulse {
-  50% { opacity: 0.35; }
+  50% {
+    opacity: 0.35;
+  }
 }
 
 .jetfx-count {
@@ -265,17 +294,42 @@
 }
 
 @media (max-width: 640px) {
-  .jetfx-jet { width: 130px; height: 130px; margin: -65px 0 0 -65px; }
-  .jetfx-hud { right: 10px; bottom: 10px; }
-  .jetfx-btn { padding: 9px 13px; font-size: 10px; }
+  .jetfx-jet {
+    width: 130px;
+    height: 130px;
+    margin: -65px 0 0 -65px;
+  }
+
+  .jetfx-hud {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .jetfx-btn {
+    padding: 9px 13px;
+    font-size: 10px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .jetfx-flame,
   .jetfx-reticle svg,
-  .jetfx-btn.is-armed .jetfx-led { animation: none !important; }
+  .jetfx-btn.is-armed .jetfx-led {
+    animation: none !important;
+  }
+
   .jetfx-shake,
-  .jetfx-quake { animation: none !important; }
-  .jetfx-destroying { animation: jetfx-fade-simple 0.3s linear forwards; }
-  @keyframes jetfx-fade-simple { to { opacity: 0; } }
+  .jetfx-quake {
+    animation: none !important;
+  }
+
+  .jetfx-destroying {
+    animation: jetfx-fade-simple 0.3s linear forwards;
+  }
+
+  @keyframes jetfx-fade-simple {
+    to {
+      opacity: 0;
+    }
+  }
 }
