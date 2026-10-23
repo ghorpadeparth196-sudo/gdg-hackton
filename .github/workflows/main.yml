@@ -1,0 +1,26 @@
+name: Website Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check Website Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Website Files
+        run: |
+          test -f index.html
+          test -f style.css
+          test -f script.js
+          echo "Website files verified successfully!"
